@@ -1,0 +1,36 @@
+name: Update GitHub Stats
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # This will run the workflow every day at midnight UTC
+  workflow_dispatch:  # Allows you to manually trigger the workflow
+
+jobs:
+  update-stats:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Update README with stats
+        run: |
+          # Replace YOUR-USERNAME with your GitHub username
+          curl -s "https://api.github.com/users/Nafy-10" | jq '. | {name: .name, public_repos: .public_repos, followers: .followers, following: .following}' > stats.json
+          echo "## GitHub Stats" >> README.md
+          echo "![Your GitHub stats](https://github-readme-stats.vercel.app/api?username=Nafy-10&show_icons=true&theme=dracula)" >> README.md
+          echo "" >> README.md
+          echo "### Stats" >> README.md
+          echo "- Public Repos: $(jq '.public_repos' stats.json)" >> README.md
+          echo "- Followers: $(jq '.followers' stats.json)" >> README.md
+          echo "- Following: $(jq '.following' stats.json)" >> README.md
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "naifabdulfetah000@gmail.com"
+          git config --local user.name "Naif Abdulfetah"
+          git add README.md
+          git commit -m "Update GitHub stats"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
